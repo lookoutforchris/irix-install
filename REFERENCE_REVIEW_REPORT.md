@@ -21,7 +21,7 @@ The new references support the modernization plan. They do not require changing 
 
 The main impact is documentation: the project should include a clear user guide that explains the full client-side IRIX workflow, not just the Docker service setup. The references confirm that BOOTP and TFTP are only the early boot/miniroot path, while `inst` later uses RSH to access distribution directories. That validates keeping RSH and `.rhosts` behavior in the container.
 
-The official SGI manuals also confirm that an installation account must allow root from target systems to access the server, either through a passwordless account or `.rhosts`. Our startup-generated `.rhosts` behavior is therefore aligned with SGI documentation, and is better than the upstream image's hardcoded `iris root`.
+The official SGI manuals also confirm that an installation account must allow root from target systems to access the server, either through a passwordless account or `.rhosts`. Our startup-generated `.rhosts` behavior is therefore aligned with SGI documentation, and is better than the upstream image's hardcoded `iris root`. Documentation should present `guest` as the recommended server-side account.
 
 ## Impact on Container Plan
 
@@ -32,6 +32,7 @@ Confirmed design choices:
 - Keep BOOTP, TFTP, and RSH together; all are part of the remote install flow.
 - Keep a `guest` account available because SGI documentation says Inst defaults to `guest` on the installation server.
 - Keep `.rhosts` generation for target hostnames because SGI documentation permits installation accounts to use `.rhosts` entries for each target system.
+- Document `guest@server:/DIST/...` as the preferred `inst` source form. The generated `.rhosts` lines still use `<target-hostname> root` because `root` is the remote user on the SGI target.
 - Keep TFTP rooted at `/DIST`; the Spinlock guide uses `/srv/tftp` plus a symlink to the install tree, but our Docker design simplifies that by making `/DIST` the TFTP root.
 - Keep short, typeable distribution paths under `/DIST`; the Spinlock guide emphasizes that users must type paths in SGI PROM and `inst`.
 - Keep Linux-only/macvlan focus; the workflow depends on LAN-style BOOTP/TFTP/RSH behavior.
@@ -80,7 +81,7 @@ Create or expand a user guide covering:
    - The first distribution is opened with `from`.
    - Additional distributions are opened with `open`.
    - At this stage, access is via RSH, not TFTP.
-   - Paths should be written relative to the remote user's home or absolute as appropriate for our container. For this project, document the exact container-supported path convention after runtime testing.
+   - Prefer `guest@server:/DIST/...` paths for this container.
 
 8. Troubleshooting.
    - Watch container logs while testing.
@@ -110,6 +111,7 @@ Project impact:
 
 - Validates keeping `guest`.
 - Validates generating `.rhosts` entries as `<target-hostname> root`.
+- Validates documenting `guest` as the normal server-side install account.
 - Supports documenting alternate install account concepts later, but not required for v1.
 
 ### IRIX Admin - System Configuration and Operation
@@ -212,7 +214,7 @@ Project impact:
 
 ## Open Questions for Runtime Testing
 
-- What exact `inst from` path convention should we document for this container when using `guest` and `/DIST`?
+- Verify the recommended `guest@server:/DIST/...` path during the first real `inst` session.
 - Should the maintained image keep only `guest`, or also add an `irix` account for compatibility with common third-party guides?
 - Should the entrypoint generate `.rhosts` entries as hostnames only, IP addresses only, or both? Official docs emphasize hostnames; the Spinlock guide notes IP-specific entries can be used.
 

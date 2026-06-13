@@ -85,6 +85,20 @@ octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/DIST
 
 The fields `sa` and `ds` point to the install server. They are not the SGI client IP. The client IP is resolved by hostname through `/etc/hosts` or an equivalent explicit BOOTP configuration.
 
+## Install Account
+
+Use `guest` as the server-side account when opening distributions from IRIX `inst`.
+
+The SGI target connects as its local `root` user, but it should log in to the container's `guest` account to read install media. The container generates `/home/guest/.rhosts` entries from `config/bootptab` so each configured SGI hostname is allowed as remote user `root`.
+
+Example `inst` source format:
+
+```text
+guest@192.168.0.9:/DIST/6.5.30/dist
+```
+
+The container also prepares `/root/.rhosts` for compatibility with older workflows, but `guest` is the recommended documented path.
+
 ## Safety Warning
 
 This project intentionally runs legacy insecure services for compatibility with old UNIX install workflows. Use only on a trusted LAN or isolated install network.

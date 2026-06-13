@@ -93,6 +93,14 @@ Inspect generated `.rhosts` after startup:
 /usr/local/bin/docker exec irix-install cat /var/log/xinetd.log
 ```
 
+The recommended IRIX `inst` account is `guest`. The generated `.rhosts` entries still end in `root` because that is the remote user on the SGI target.
+
+Example source path to try from `inst`:
+
+```text
+guest@192.168.0.9:/DIST/6.5.30/dist
+```
+
 ## Verified Hardware Test
 
 On 2026-06-13, an SGI Octane2 successfully reached the maintained container over `macvlan` and loaded the 64-bit standalone shell.

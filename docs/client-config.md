@@ -62,12 +62,28 @@ iris root
 
 in `/root/.rhosts` and `/home/guest/.rhosts`.
 
-The maintained image should generate `.rhosts` from configured BOOTP hostnames. For the example above, it should generate:
+The maintained image generates `.rhosts` from configured BOOTP hostnames. For the examples above, it generates:
 
 ```text
 octane root
 onyx root
 ```
+
+The second field is the SGI target's remote user, not the container account. During installation the SGI runs `inst` as root, then uses RSH to access the install server.
+
+Recommended server-side install account:
+
+```text
+guest
+```
+
+Recommended `inst` source form:
+
+```text
+guest@192.168.0.9:/DIST/6.5.30/dist
+```
+
+The container writes the generated trust entries to both `/home/guest/.rhosts` and `/root/.rhosts`. Use `guest` in documentation and normal workflows; root access is kept only for compatibility with older examples and troubleshooting.
 
 This is insecure legacy behavior and should only be used on a trusted install LAN.
 
