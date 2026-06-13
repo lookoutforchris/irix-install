@@ -77,7 +77,7 @@ After the maintained image exists, verify:
 - container starts on the external `macvlan` network
 - container receives the configured static IP
 - `xinetd -dontfork` is PID 1
-- `/DIST` is mounted read-only
+- `/home/guest/irix` is mounted read-only
 - BOOTP listens on UDP 67
 - TFTP listens on UDP 69
 - RSH listens on TCP 514
@@ -98,7 +98,7 @@ The recommended IRIX `inst` account is `guest`. The generated `.rhosts` entries 
 Example source path to try from `inst`:
 
 ```text
-guest@192.168.0.9:/DIST/6.5.30/dist
+guest@192.168.0.9:irix/6530/dist
 ```
 
 ## Verified Hardware Test
@@ -108,7 +108,7 @@ On 2026-06-13, an SGI Octane2 successfully reached the maintained container over
 PROM command used on the SGI client:
 
 ```text
-bootp():6.5.30/stand/sash64 -x
+bootp():6530/stand/sash64 -x
 ```
 
 Observed result:

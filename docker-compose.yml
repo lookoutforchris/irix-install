@@ -15,7 +15,7 @@ services:
       net.ipv4.ip_local_port_range: 2048 32767
       net.ipv4.ip_no_pmtu_disc: 1
     volumes:
-      - ./dist:/DIST:ro
+      - ./irix:/home/guest/irix:ro
       - ./config/bootptab:/etc/bootptab:ro
       - ./config/hosts:/etc/hosts:ro
     restart: no

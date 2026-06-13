@@ -5,6 +5,6 @@ service tftp
     wait            = yes
     user            = root
     server          = /usr/sbin/in.tftpd
-    server_args     = -s /DIST
+    server_args     = -s /home/guest/irix
     disable         = no
 }

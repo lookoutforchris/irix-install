@@ -7,7 +7,7 @@ Each SGI client that uses this install server needs entries in both `config/boot
 Example:
 
 ```text
-octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/DIST
+octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
 ```
 
 Fields:
@@ -16,7 +16,7 @@ Fields:
 - `ha=080069c0ffee` - SGI client MAC address without separators.
 - `sa=192.168.0.9` - install server address.
 - `ds=192.168.0.9` - domain/DNS server address supplied to the client.
-- `rp=/DIST` - root path supplied to the client.
+- `rp=/home/guest/irix` - root path supplied to the client.
 
 `sa` and `ds` are server-side fields. They are not the client IP address.
 
@@ -45,7 +45,7 @@ For a new SGI system:
 Example:
 
 ```text
-onyx:ha=080069112233:sa=192.168.0.9:ds=192.168.0.9:rp=/DIST
+onyx:ha=080069112233:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
 ```
 
 ```text
@@ -80,10 +80,17 @@ guest
 Recommended `inst` source form:
 
 ```text
-guest@192.168.0.9:/DIST/6.5.30/dist
+guest@192.168.0.9:irix/6530/dist
 ```
 
 The container writes the generated trust entries to both `/home/guest/.rhosts` and `/root/.rhosts`. Use `guest` in documentation and normal workflows; root access is kept only for compatibility with older examples and troubleshooting.
+
+The TFTP server is rooted at `/home/guest/irix`, so the media-relative path is the same in both phases:
+
+```text
+PROM: bootp():6530/stand/sash64 -x
+inst: guest@192.168.0.9:irix/6530/dist
+```
 
 This is insecure legacy behavior and should only be used on a trusted install LAN.
 
@@ -94,7 +101,7 @@ An SGI Octane2 client was verified against the maintained install container on 2
 Working PROM command:
 
 ```text
-bootp():6.5.30/stand/sash64 -x
+bootp():6530/stand/sash64 -x
 ```
 
 This loaded the 64-bit standalone shell and confirmed BOOTP/TFTP function against real SGI hardware.

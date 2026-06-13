@@ -2,6 +2,6 @@
 # Copy this file to config/bootptab and edit hostnames, MAC addresses, and server IPs.
 #
 # Format:
-# hostname:ha=<client-mac-without-colons>:sa=<install-server-ip>:ds=<dns-or-install-server-ip>:rp=/DIST
+# hostname:ha=<client-mac-without-colons>:sa=<install-server-ip>:ds=<dns-or-install-server-ip>:rp=/home/guest/irix
 
-octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/DIST
+octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix

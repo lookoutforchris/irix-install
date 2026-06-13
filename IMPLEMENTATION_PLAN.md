@@ -2,7 +2,7 @@
 
 ## Summary
 
-Replace the abandoned `dexter1/irix-install:latest` dependency with a locally owned, documented Docker image for SGI IRIX network installs. Preserve compatibility first: keep the BOOTP, xinetd, RSH, `.rhosts`, and `/DIST` service model, modernize the base image to Debian Bookworm slim, and replace old Debian `tftpd` with `tftpd-hpa`.
+Replace the abandoned `dexter1/irix-install:latest` dependency with a locally owned, documented Docker image for SGI IRIX network installs. Preserve compatibility first: keep the BOOTP, xinetd, RSH, `.rhosts`, and install-media service model, modernize the base image to Debian Bookworm slim, and replace old Debian `tftpd` with `tftpd-hpa`.
 
 Primary deployment target is Linux Docker, with Synology/Galaxy as the first supported environment.
 
@@ -12,7 +12,7 @@ Implementation status: image source, compose changes, startup `.rhosts` generati
 
 1. Preserve the current state.
    - Keep `archives/2026-06-13-pre-modernization.tar.gz`.
-   - Do not include `dist/` in archives, git, image layers, or Docker build context.
+   - Do not include install media in archives, git, image layers, or Docker build context.
 
 2. Add a maintained image build.
    - Create a `Dockerfile` based on `debian:bookworm-slim`.
@@ -24,7 +24,7 @@ Implementation status: image source, compose changes, startup `.rhosts` generati
 3. Bake static service config into the image.
    - Add xinetd service files for `bootps`, `tftp`, and `shell`.
    - Keep `bootpd` args as `-i -t0 -d4 /etc/bootptab`.
-   - Keep TFTP args as `-s /DIST`.
+   - Keep TFTP args as `-s /home/guest/irix`.
    - Keep RSH service as `/usr/sbin/in.rshd`.
 
 4. Add startup generation.
@@ -40,7 +40,7 @@ Implementation status: image source, compose changes, startup `.rhosts` generati
 
 6. Add build hygiene.
    - Add `.dockerignore`.
-   - Exclude `dist/`, `archives/`, Synology `@eaDir`, and temporary files.
+   - Exclude `irix/`, legacy `dist/`, `archives/`, Synology `@eaDir`, and temporary files.
 
 7. Verify on Galaxy.
    - Build with host networking if APT requires it.
@@ -78,7 +78,7 @@ Runtime checks should confirm:
 
 - `irix-install` is running.
 - container IP is `192.168.0.9`.
-- `/DIST` is read-only.
+- `/home/guest/irix` is read-only.
 - `xinetd -dontfork` is running as PID 1.
 - BOOTP, TFTP, and RSH services are loaded.
 - `.rhosts` contains each configured BOOTP hostname followed by `root`.
@@ -89,4 +89,4 @@ Runtime checks should confirm:
 - Debian Bookworm slim for first maintained image.
 - Keep macvlan as recommended deployment mode.
 - Keep insecure legacy RSH compatibility, but document it clearly.
-- Do not include `dist/` in any project-generated artifact.
+- Do not include install media in any project-generated artifact.

@@ -62,7 +62,7 @@ The maintained compose file now builds a local image:
 
 Normal runtime mounts are reduced to user-specific config and media:
 
-- `/volume1/docker/irix-install/dist` to `/DIST:ro`
+- `./irix` to `/home/guest/irix:ro`
 - `/volume1/docker/irix-install/config/bootptab` to `/etc/bootptab:ro`
 - `/volume1/docker/irix-install/config/hosts` to `/etc/hosts:ro`
 
@@ -77,7 +77,7 @@ The old image uses `xinetd` and includes `/etc/xinetd.d`.
 Enabled services:
 
 - `bootps` on UDP 67 via `/usr/sbin/bootpd`
-- `tftp` on UDP 69 via `/usr/sbin/in.tftpd -s /DIST`
+- `tftp` on UDP 69 via `/usr/sbin/in.tftpd -s /home/guest/irix`
 - `shell` on TCP 514 via `/usr/sbin/in.rshd`
 
 No `/etc/inetd.conf` is used.

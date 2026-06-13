@@ -32,9 +32,9 @@ Confirmed design choices:
 - Keep BOOTP, TFTP, and RSH together; all are part of the remote install flow.
 - Keep a `guest` account available because SGI documentation says Inst defaults to `guest` on the installation server.
 - Keep `.rhosts` generation for target hostnames because SGI documentation permits installation accounts to use `.rhosts` entries for each target system.
-- Document `guest@server:/DIST/...` as the preferred `inst` source form. The generated `.rhosts` lines still use `<target-hostname> root` because `root` is the remote user on the SGI target.
-- Keep TFTP rooted at `/DIST`; the Spinlock guide uses `/srv/tftp` plus a symlink to the install tree, but our Docker design simplifies that by making `/DIST` the TFTP root.
-- Keep short, typeable distribution paths under `/DIST`; the Spinlock guide emphasizes that users must type paths in SGI PROM and `inst`.
+- Document `guest@server:irix/...` as the preferred `inst` source form. The generated `.rhosts` lines still use `<target-hostname> root` because `root` is the remote user on the SGI target.
+- Keep TFTP rooted at `/home/guest/irix`; this lets PROM/TFTP and `inst`/RSH use the same media-relative path while keeping `guest` as the documented install account.
+- Keep short, typeable distribution paths under the media root; the Spinlock guide emphasizes that users must type paths in SGI PROM and `inst`.
 - Keep Linux-only/macvlan focus; the workflow depends on LAN-style BOOTP/TFTP/RSH behavior.
 
 Potential future enhancement:
@@ -50,7 +50,7 @@ Create or expand a user guide covering:
    - The client then uses TFTP to fetch early boot/install files.
    - Once `inst` is running, it uses RSH to read install distributions.
 
-2. How to prepare `/DIST`.
+2. How to prepare `irix/`.
    - IRIX install files may come from physical CDs, EFS CD images, or extracted tarballs.
    - The first remotely booted files are from the Installation Tools and Overlays media.
    - Important paths include `stand/`, `dist/sa`, and `dist/miniroot/`.
@@ -60,7 +60,7 @@ Create or expand a user guide covering:
    - Set the client IP in PROM with `setenv netaddr <client-ip>`.
    - Match the client hostname and IP in `config/hosts`.
    - Match the hostname and MAC address in `config/bootptab`.
-   - Use `sa`, `ds`, and `rp=/DIST` to point clients at the install server.
+   - Use `sa`, `ds`, and `rp=/home/guest/irix` to point clients at the install server.
 
 4. How to test BOOTP and TFTP before installing.
    - From the SGI System Maintenance menu, enter Command Monitor.
@@ -81,13 +81,13 @@ Create or expand a user guide covering:
    - The first distribution is opened with `from`.
    - Additional distributions are opened with `open`.
    - At this stage, access is via RSH, not TFTP.
-   - Prefer `guest@server:/DIST/...` paths for this container.
+   - Prefer `guest@server:irix/...` paths for this container.
 
 8. Troubleshooting.
    - Watch container logs while testing.
    - Confirm xinetd is listening on UDP 67, UDP 69, and TCP 514.
    - Confirm the SGI PROM `netaddr` matches `config/hosts` and `config/bootptab`.
-   - Confirm the requested TFTP path exists below `/DIST`.
+   - Confirm the requested TFTP path exists below the media root.
    - Confirm generated `.rhosts` includes `<client-hostname> root`.
    - Be aware that multiple BOOTP servers on the same LAN can cause confusing behavior.
 
@@ -210,11 +210,11 @@ Project impact:
   - BOOTP/TFTP/RSH diagnostics, container checks, SGI PROM checks, and common path/IP mistakes.
 
 - `docs/media-layout.md`
-  - Expected `/DIST` structure and examples using the current staged directories `6.5`, `6.5.22`, `6.5.30`, `onc3nfs`, and `patch`.
+  - Expected media-root structure and examples using staged directories such as `65`, `6522`, `6530`, `onc3nfs`, and `patch`.
 
 ## Open Questions for Runtime Testing
 
-- Verify the recommended `guest@server:/DIST/...` path during the first real `inst` session.
+- Verify the recommended `guest@server:irix/...` path during the first real `inst` session.
 - Should the maintained image keep only `guest`, or also add an `irix` account for compatibility with common third-party guides?
 - Should the entrypoint generate `.rhosts` entries as hostnames only, IP addresses only, or both? Official docs emphasize hostnames; the Spinlock guide notes IP-specific entries can be used.
 
@@ -223,7 +223,7 @@ Project impact:
 On 2026-06-13, an SGI Octane2 successfully booted `sash64` from the maintained Bookworm-based container using:
 
 ```text
-bootp():6.5.30/stand/sash64 -x
+bootp():6530/stand/sash64 -x
 ```
 
 The SGI reported standalone shell `Version 6.5 ARCS Apr 30, 1998 (64 Bit)`, and basic `sash` commands such as `ls` and `help` worked. This confirms the new image's BOOTP/TFTP path works with real SGI hardware for the initial network boot stage.

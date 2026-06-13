@@ -11,7 +11,7 @@ Primary target:
 - Linux Docker host
 - External `macvlan` network
 - Static LAN IP for the install server container
-- Read-only `/DIST` mount containing IRIX install media
+- Read-only `/home/guest/irix` mount containing IRIX install media
 
 Windows Docker Desktop is not a supported runtime target for real SGI LAN installs. It may be useful for limited image development only.
 
@@ -35,9 +35,9 @@ Example SGI client:
 - `config/hosts` - install server and SGI client hostname mappings.
 - `config/bootptab.example` - sanitized BOOTP example.
 - `config/hosts.example` - sanitized hosts example.
-- `dist/` - IRIX install media mounted as `/DIST:ro`.
+- `irix/` - IRIX install media mounted as `/home/guest/irix:ro`.
 - `docs/` - project notes, operations, and client configuration documentation.
-- `archives/` - local project-state archives that intentionally exclude `dist/`.
+- `archives/` - local project-state archives that intentionally exclude install media.
 - `Dockerfile` - maintained Debian Bookworm image build.
 - `docker/entrypoint.sh` - generates `.rhosts` and starts `xinetd`.
 - `docker/xinetd.d/` - BOOTP, TFTP, and RSH xinetd services baked into the image.
@@ -67,7 +67,7 @@ cp config/bootptab.example config/bootptab
 cp config/hosts.example config/hosts
 ```
 
-Then edit both files for your SGI hardware and LAN.
+Then edit both files for your SGI hardware and LAN, and place your install media under `irix/`.
 
 ## Configuration Model
 
@@ -80,10 +80,17 @@ Each SGI client needs:
 Example `bootptab` entry:
 
 ```text
-octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/DIST
+octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
 ```
 
 The fields `sa` and `ds` point to the install server. They are not the SGI client IP. The client IP is resolved by hostname through `/etc/hosts` or an equivalent explicit BOOTP configuration.
+
+The media-relative path stays consistent between PROM/TFTP and `inst`/RSH:
+
+```text
+PROM: bootp():6530/stand/sash64 -x
+inst: guest@192.168.0.9:irix/6530/dist
+```
 
 ## Install Account
 
@@ -94,7 +101,7 @@ The SGI target connects as its local `root` user, but it should log in to the co
 Example `inst` source format:
 
 ```text
-guest@192.168.0.9:/DIST/6.5.30/dist
+guest@192.168.0.9:irix/6530/dist
 ```
 
 The container also prepares `/root/.rhosts` for compatibility with older workflows, but `guest` is the recommended documented path.
@@ -103,4 +110,4 @@ The container also prepares `/root/.rhosts` for compatibility with older workflo
 
 This project intentionally runs legacy insecure services for compatibility with old UNIX install workflows. Use only on a trusted LAN or isolated install network.
 
-Do not commit, archive, or bake `dist/` into an image.
+Do not commit, archive, or bake `irix/` into an image.

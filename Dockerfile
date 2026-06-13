@@ -19,7 +19,8 @@ RUN useradd -c "Guest User" -d /home/guest -m -s /bin/mksh guest \
     && chsh -s /bin/mksh root \
     && passwd -d root \
     && passwd -d guest \
-    && mkdir -p /DIST
+    && mkdir -p /home/guest/irix \
+    && ln -s /home/guest/irix /DIST
 
 COPY docker/xinetd.d/bootps /etc/xinetd.d/bootps
 COPY docker/xinetd.d/tftp /etc/xinetd.d/tftp
@@ -31,7 +32,7 @@ RUN chmod 0644 /etc/xinetd.d/bootps /etc/xinetd.d/tftp /etc/xinetd.d/rsh \
     && chmod 0644 /etc/xinetd.conf \
     && chmod 0755 /usr/local/sbin/irix-install-entrypoint
 
-VOLUME ["/DIST"]
+VOLUME ["/home/guest/irix"]
 
 EXPOSE 67/udp 69/udp 514/tcp
 
