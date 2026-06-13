@@ -1,5 +1,9 @@
 FROM debian:bookworm-slim
 
+LABEL org.opencontainers.image.source="https://github.com/lookoutforchris/irix-install"
+LABEL org.opencontainers.image.description="Docker-based SGI IRIX network install server"
+LABEL org.opencontainers.image.licenses="MIT"
+
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
