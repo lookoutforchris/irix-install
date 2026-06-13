@@ -1,0 +1,17 @@
+dist/
+archives/
+reference/
+config/bootptab
+config/hosts
+config/xinetd.d/
+info/
+*.url
+PLAN.AGENT.md
+**/@eaDir/
+@eaDir/
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.tmp
+*.log

@@ -1,0 +1,8 @@
+* text=auto
+
+Dockerfile text eol=lf
+docker-compose.yml text eol=lf
+*.sh text eol=lf
+docker/xinetd.conf text eol=lf
+docker/xinetd.d/* text eol=lf
+config/*.example text eol=lf

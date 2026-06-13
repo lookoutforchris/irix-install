@@ -1,0 +1,29 @@
+version: "3.8"
+services:
+  irix-install:
+    build:
+      context: .
+      network: host
+    image: irix-install:local
+    container_name: irix-install
+    hostname: irix-install
+    tty: true
+    stdin_open: true
+    environment:
+      - TZ=America/New_York
+    sysctls:
+      net.ipv4.ip_local_port_range: 2048 32767
+      net.ipv4.ip_no_pmtu_disc: 1
+    volumes:
+      - ./dist:/DIST:ro
+      - ./config/bootptab:/etc/bootptab:ro
+      - ./config/hosts:/etc/hosts:ro
+    restart: no
+    networks:
+      macvlan:
+        ipv4_address: 192.168.0.9
+
+networks:
+  macvlan:
+    external: true
+    name: macvlan

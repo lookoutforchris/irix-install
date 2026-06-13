@@ -1,0 +1,14 @@
+dist/
+archives/
+reference/
+**/@eaDir/
+@eaDir/
+.git/
+.gitignore
+*.tar
+*.tar.gz
+*.tgz
+*.zip
+*.tmp
+*.log
+*.url
