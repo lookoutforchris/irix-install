@@ -146,7 +146,7 @@ Edit these fields:
 - `ip=192.168.0.10`: SGI client IP address, should match /etc/hosts.
 - `sm=255.255.255.0`: subnet mask.
 - `sa=192.168.0.9`: install server IP, should match /etc/hosts.
-- `ds=192.168.0.9`: DNS/server address supplied to the SGI client.
+- `ds=192.168.0.9`: distribution server address supplied to the SGI client.
 - `gw=192.168.0.1`: gateway supplied to the SGI client.
 - `rp=/home/guest/irix`: root path supplied to the SGI client.
 
