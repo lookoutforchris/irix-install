@@ -65,7 +65,7 @@ irix-install/
 	  stand/
 ```
 
-Put your IRIX install media under `irix/`. The folder names are your choice; the examples in this README use `6530` for IRIX 6.5.30. I combine all the foundation/base files under irix/65/ and then all the overlays under irix/652 or irix/6530 and so on. For the handful of common files in an install, I just munge them together. The shorter the path the easier it is to do the installs.
+Put your IRIX install media under `irix/`. The folder names are your choice; the examples in this README use `6530` for IRIX 6.5.30. I combine all the foundation/base files under irix/65/ and then all the overlays under irix/6522 or irix/6530 and so on. For the handful of common files in an install, I just munge them together. The shorter the path the easier it is to do the installs.
 
 ### 2. Create `docker-compose.yml`
 
@@ -347,16 +347,10 @@ printenv netaddr
 setenv netaddr 192.168.0.10
 ```
 
-If your PROM has `dserver`, set it to the install server IP:
+If your PROM has `dlserver`, set it to the install server IP:
 
 ```text
-setenv dserver 192.168.0.9
-```
-
-Then return to the menu when needed:
-
-```text
-exit
+setenv dlserver 192.168.0.9
 ```
 
 ### Command Monitor Method
