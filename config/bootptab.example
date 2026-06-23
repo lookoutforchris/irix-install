@@ -1,7 +1,14 @@
 # Example BOOTP client entries.
-# Copy this file to config/bootptab and edit hostnames, MAC addresses, and server IPs.
+# Copy this file to config/bootptab and edit hostnames, MAC addresses, and network values.
+#
+# Keep each client entry on one line. The container uses the hostname before
+# the first colon to generate .rhosts trust entries at startup.
 #
 # Format:
-# hostname:ha=<client-mac-without-colons>:sa=<install-server-ip>:ds=<dns-or-install-server-ip>:rp=/home/guest/irix
+# hostname:ht=ether:ha=<client-mac-without-colons>:ip=<client-ip>:sm=<subnet-mask>:sa=<install-server-ip>:ds=<dns-or-install-server-ip>:gw=<gateway-ip>:rp=/home/guest/irix
+#
+# Optional:
+# bf=<tftp-root-relative-boot-file>
+# Example: bf=6530/stand/sash64
 
-octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
+octane:ht=ether:ha=080069c0ffee:ip=192.168.0.10:sm=255.255.255.0:sa=192.168.0.9:ds=192.168.0.9:gw=192.168.0.1:rp=/home/guest/irix

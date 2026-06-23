@@ -1,5 +1,6 @@
 # Example hosts file mounted into the container as /etc/hosts.
 # Copy this file to config/hosts and edit for your LAN.
+# Client IP addresses here should match the ip= values in config/bootptab.
 
 127.0.0.1       localhost
 ::1             localhost ip6-localhost ip6-loopback
@@ -8,5 +9,7 @@ ff00::0         ip6-mcastprefix
 ff02::1         ip6-allnodes
 ff02::2         ip6-allrouters
 
-192.168.0.9     irix-install
-192.168.0.10    octane
+192.168.0.9     cosmos cosmos.example.net
+192.168.0.10    octane octane.example.net
+
+

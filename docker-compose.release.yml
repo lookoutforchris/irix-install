@@ -1,10 +1,8 @@
 version: "3.8"
+
 services:
   irix-install:
-    build:
-      context: .
-      network: host
-    image: irix-install:local
+    image: ghcr.io/lookoutforchris/irix-install:0.1.1
     container_name: irix-install
     hostname: cosmos
     tty: true
@@ -18,7 +16,7 @@ services:
       - ./irix:/home/guest/irix:ro
       - ./config/bootptab:/etc/bootptab:ro
       - ./config/hosts:/etc/hosts:ro
-    restart: no
+    restart: unless-stopped
     networks:
       macvlan:
         ipv4_address: 192.168.0.9
@@ -27,4 +25,3 @@ networks:
   macvlan:
     external: true
     name: macvlan
-

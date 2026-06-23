@@ -7,29 +7,41 @@ Each SGI client that uses this install server needs entries in both `config/boot
 Example:
 
 ```text
-octane:ha=080069c0ffee:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
+octane:ht=ether:ha=080069c0ffee:ip=192.168.0.10:sm=255.255.255.0:sa=192.168.0.9:ds=192.168.0.9:gw=192.168.0.1:rp=/home/guest/irix
 ```
 
 Fields:
 
 - `octane` - SGI client hostname.
+- `ht=ether` - hardware type, explicitly Ethernet.
 - `ha=080069c0ffee` - SGI client MAC address without separators.
+- `ip=192.168.0.10` - SGI client IP address.
+- `sm=255.255.255.0` - subnet mask supplied to the client.
 - `sa=192.168.0.9` - install server address.
 - `ds=192.168.0.9` - domain/DNS server address supplied to the client.
+- `gw=192.168.0.1` - gateway supplied to the client.
 - `rp=/home/guest/irix` - root path supplied to the client.
 
-`sa` and `ds` are server-side fields. They are not the client IP address.
+`sa` and `ds` are server-side fields. `ip` is the SGI client IP address.
+
+Optional field:
+
+- `bf=6530/stand/sash64` - default boot file, relative to the TFTP root. This is useful for menu-driven installs or default boots, but explicit PROM commands such as `bootp():6530/stand/sash64 -x` do not require it.
+
+Keep each client entry on one line. The container uses the hostname before the first colon to generate `.rhosts` trust entries at startup.
 
 ## Hosts Entry
 
 Example entries:
 
 ```text
-192.168.0.9     irix-install
-192.168.0.10    octane
+192.168.0.9     cosmos cosmos.siliconsurf.net
+192.168.0.10    octane octane.siliconsurf.net
 ```
 
 The BOOTP client IP is resolved from the hostname, so the hostname in `bootptab` should match a hostname in `hosts`.
+
+When you know the full domain name, include both the short name and the FQDN in `hosts`.
 
 ## Adding a Client
 
@@ -39,17 +51,17 @@ For a new SGI system:
 2. Assign or confirm the SGI client IP.
 3. Find the SGI system MAC address.
 4. Add the hostname/IP to `config/hosts`.
-5. Add a matching hostname/MAC line to `config/bootptab`.
-6. Keep `sa`, `ds`, and `rp` pointed at the install server unless using a different server layout.
+5. Add a matching hostname/MAC/IP line to `config/bootptab`.
+6. Keep `sa`, `ds`, `gw`, and `rp` aligned with your LAN and install server unless using a different server layout.
 
 Example:
 
 ```text
-onyx:ha=080069112233:sa=192.168.0.9:ds=192.168.0.9:rp=/home/guest/irix
+onyx:ht=ether:ha=080069112233:ip=192.168.0.12:sm=255.255.255.0:sa=192.168.0.9:ds=192.168.0.9:gw=192.168.0.1:rp=/home/guest/irix
 ```
 
 ```text
-192.168.0.12    onyx
+192.168.0.12    onyx onyx.siliconsurf.net
 ```
 
 ## RSH Trust
@@ -105,3 +117,5 @@ bootp():6530/stand/sash64 -x
 ```
 
 This loaded the 64-bit standalone shell and confirmed BOOTP/TFTP function against real SGI hardware.
+
+
