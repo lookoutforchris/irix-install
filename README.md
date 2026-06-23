@@ -355,13 +355,13 @@ setenv dlserver 192.168.0.9
 
 ### Command Monitor Method
 
-From the Command Monitor, boot `sash64` first:
+From the Command Monitor, boot `sash64` first (or sashARCS if you are not on a 64-bit platform):
 
 ```text
 bootp():6530/stand/sash64 -x
 ```
 
-On Octane/Octane2, run `fx.64` from `sash64`:
+On Octane/Octane2, run `fx.64` (or fx.ARCS if you are not on a 64-bit platform) from `sash64`:
 
 ```text
 boot -f bootp():6530/stand/fx.64 --x
@@ -442,6 +442,14 @@ docker inspect -f 'IP={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} H
 
 The container IP should match the `sa=` value in `config/bootptab` and the install server entry in `config/hosts`.
 
+Watch the container logs while testing an SGI boot:
+
+```sh
+docker logs -f irix-install
+```
+
+If the SGI never reaches TFTP, verify that BOOTP requests are reaching this container and that no other BOOTP/DHCP-style install server is answering first.
+
 If the Linux host has a firewall, allow the legacy install services on the install LAN:
 
 ```text
@@ -474,6 +482,15 @@ But `inst` uses RSH through the `guest` account, so `inst` paths do include `iri
 guest@192.168.0.9:irix/6530/dist
 ```
 
+Also confirm the requested file actually exists for the target system architecture. For example, Octane/Octane2 systems use IP30 miniroots and 64-bit standalone tools:
+
+```sh
+docker exec irix-install test -f /home/guest/irix/6530/stand/sash64
+docker exec irix-install test -f /home/guest/irix/6530/dist/miniroot/unix.IP30
+```
+
+Older systems may need a different IRIX release or a different standalone tool, such as `.ARCS` instead of `.64`.
+
 ### Hostname Mismatch
 
 If you use the PROM menu's `Remote Directory` flow or specify a server name in a `bootp()` path, the server name should match the container hostname and a name in `config/hosts`.
@@ -487,6 +504,14 @@ hostname: cosmos
 ```text
 192.168.0.9     cosmos cosmos.example.net
 ```
+
+For named PROM boot paths, use the hostname form, not the IP address form:
+
+```text
+bootp()cosmos:6530/stand/sash64 -x
+```
+
+The named server must match the container hostname. Keep the matching short hostname in `config/hosts`, even if you also include a fully qualified name.
 
 If you change the Compose hostname or either config file, recreate the container:
 
@@ -511,6 +536,14 @@ octane root
 ```
 
 Keep each `bootptab` client entry on one line. If you edit `config/bootptab`, recreate the container so `.rhosts` is regenerated.
+
+If `inst` can reach the server but cannot open distributions, check for RSH authentication failures:
+
+```sh
+docker logs irix-install
+```
+
+Messages about denied access, `.rhosts`, or PAM usually mean the client hostname in `config/bootptab`, `config/hosts`, and the generated `/home/guest/.rhosts` do not agree. This image is built to avoid the common manual Linux setup problem where `/etc/pam.d/rsh` blocks passwordless RSH, so hostname trust is the first thing to check.
 
 ### `fx.64` Does Not Boot Directly
 
