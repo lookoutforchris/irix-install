@@ -35,8 +35,8 @@ Keep each client entry on one line. The container uses the hostname before the f
 Example entries:
 
 ```text
-192.168.0.9     cosmos cosmos.siliconsurf.net
-192.168.0.10    octane octane.siliconsurf.net
+192.168.0.9     cosmos cosmos.example.net
+192.168.0.10    octane octane.example.net
 ```
 
 The BOOTP client IP is resolved from the hostname, so the hostname in `bootptab` should match a hostname in `hosts`.
@@ -61,7 +61,7 @@ onyx:ht=ether:ha=080069112233:ip=192.168.0.12:sm=255.255.255.0:sa=192.168.0.9:ds
 ```
 
 ```text
-192.168.0.12    onyx onyx.siliconsurf.net
+192.168.0.12    onyx onyx.example.net
 ```
 
 ## RSH Trust
@@ -117,5 +117,4 @@ bootp():6530/stand/sash64 -x
 ```
 
 This loaded the 64-bit standalone shell and confirmed BOOTP/TFTP function against real SGI hardware.
-
 

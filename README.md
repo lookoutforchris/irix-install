@@ -236,34 +236,6 @@ View container logs:
 docker compose logs
 ```
 
-## Booting An SGI Client
-
-From the SGI PROM, boot the standalone shell from the TFTP root. This example assumes your media is under `irix/6530` on the Docker host:
-
-```text
-bootp():6530/stand/sash64 -x
-```
-
-For an Octane/Octane2, booting `fx` may require starting `sash64` first, then running:
-
-```text
-boot -f bootp():6530/stand/fx.64 --x
-```
-
-To boot the IP30 miniroot from `sash64`:
-
-```text
-boot -f bootp():6530/dist/miniroot/unix.IP30
-```
-
-Inside IRIX `inst`, use the `guest` account and the same media folder:
-
-```text
-guest@192.168.0.9:irix/6530/dist
-```
-
-Use the IP address unless you have verified name resolution inside the SGI install environment.
-
 ## Configuration Notes
 
 The TFTP server is rooted at `/home/guest/irix`, which is your local `./irix` folder. PROM paths are relative to that root.
@@ -438,7 +410,7 @@ cosmos
 The install server hostname should match the container hostname and a name in `config/hosts`. In this project, that is `cosmos`:
 
 ```text
-192.168.0.9     cosmos cosmos.siliconsurf.net
+192.168.0.9     cosmos cosmos.example.net
 ```
 
 The PROM menu method uses the early BOOTP/TFTP install path. After the miniroot starts and you reach `Inst>`, access to distributions uses RSH instead.
@@ -468,7 +440,4 @@ Use the IP address unless hostname resolution works inside the SGI miniroot.
 This project intentionally runs legacy insecure services for compatibility with old UNIX install workflows. Use only on a trusted LAN or isolated install network.
 
 Do not commit, archive, or bake `irix/` into an image.
-
-
-
 
