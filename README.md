@@ -257,7 +257,7 @@ docker compose build
 docker compose up -d --force-recreate
 ```
 
-Galaxy/Synology may use `/usr/local/bin/docker-compose` instead of `docker compose`.
+Your Linux system may use `/usr/local/bin/docker-compose` instead of `docker compose` so check that.
 
 ## Supported Deployment
 
@@ -429,6 +429,128 @@ guest@192.168.0.9:irix/6530/dist
 
 Use the IP address unless hostname resolution works inside the SGI miniroot.
 
+## Troubleshooting
+
+### SGI Client Gets No Response From The Server
+
+Confirm the container is running and has the expected LAN IP:
+
+```sh
+docker compose ps
+docker inspect -f 'IP={{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}} Hostname={{.Config.Hostname}}' irix-install
+```
+
+The container IP should match the `sa=` value in `config/bootptab` and the install server entry in `config/hosts`.
+
+If the Linux host has a firewall, allow the legacy install services on the install LAN:
+
+```text
+UDP 67   BOOTP
+UDP 69   TFTP
+TCP 514  RSH
+```
+
+The verified Galaxy/Synology setup did not require a special project-specific firewall change, but any host firewall or router ACL that blocks those ports can break installs.
+
+### BOOTP Works But TFTP Cannot Find The File
+
+PROM paths are relative to the TFTP root, which is `/home/guest/irix` inside the container and `./irix` on the Docker host.
+
+Use this from the PROM:
+
+```text
+bootp():6530/stand/sash64 -x
+```
+
+Do not include `irix/` in PROM/TFTP paths. This is wrong for the PROM:
+
+```text
+bootp():irix/6530/stand/sash64 -x
+```
+
+But `inst` uses RSH through the `guest` account, so `inst` paths do include `irix/`:
+
+```text
+guest@192.168.0.9:irix/6530/dist
+```
+
+### Hostname Mismatch
+
+If you use the PROM menu's `Remote Directory` flow or specify a server name in a `bootp()` path, the server name should match the container hostname and a name in `config/hosts`.
+
+For this README's example:
+
+```yaml
+hostname: cosmos
+```
+
+```text
+192.168.0.9     cosmos cosmos.example.net
+```
+
+If you change the Compose hostname or either config file, recreate the container:
+
+```sh
+docker compose up -d --force-recreate
+```
+
+### `.rhosts` Does Not Include A Client
+
+The container generates `/home/guest/.rhosts` and `/root/.rhosts` from the hostnames in `config/bootptab` when it starts.
+
+Check the generated file:
+
+```sh
+docker exec irix-install cat /home/guest/.rhosts
+```
+
+Expected example:
+
+```text
+octane root
+```
+
+Keep each `bootptab` client entry on one line. If you edit `config/bootptab`, recreate the container so `.rhosts` is regenerated.
+
+### `fx.64` Does Not Boot Directly
+
+On Octane/Octane2, direct `fx.64` boot may fail even when BOOTP/TFTP are working. Boot `sash64` first:
+
+```text
+bootp():6530/stand/sash64 -x
+```
+
+Then run `fx.64` from `sash64`:
+
+```text
+boot -f bootp():6530/stand/fx.64 --x
+```
+
+The `--x` form is intentional in this context because one leading dash is stripped while passing the argument through the boot layer.
+
+### Multiple BOOTP Servers
+
+If more than one BOOTP server is active on the same LAN, the wrong server can answer. Temporarily disable other BOOTP/DHCP-style install services, or specify the intended install server hostname in the boot path if your PROM and server setup support it.
+
+When specifying the server name, keep the hostname consistent with the container hostname.
+
+### Development Build Cannot Reach Debian Packages
+
+On Galaxy/Synology, temporary Docker build containers could resolve DNS but could not reach Debian package mirrors on the default Docker bridge network. The local development Compose file uses host networking for builds:
+
+```yaml
+build:
+  context: .
+  network: host
+```
+
+For a manual development build on Galaxy, use:
+
+```sh
+/usr/local/bin/docker build --network host -t irix-install:local .
+```
+
+This does not affect the release Compose file because the release file pulls the published image instead of building it.
 ## Safety Warning
 
 This project intentionally runs legacy insecure services for compatibility with old UNIX install workflows. Use only on a trusted LAN or isolated install network.
