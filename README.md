@@ -152,7 +152,7 @@ Edit these fields:
 
 Optional field:
 
-- `bf=6530/stand/sash64`: default boot file, relative to the TFTP root. Explicit PROM commands such as `bootp():6530/stand/sash64 -x` do not require it.
+- `bf=<tftp-root-relative-file>`: optional default boot file. Leave this unset unless you have tested a default boot path for that client; the documented workflow uses explicit PROM commands instead.
 
 Keep each client entry on one line. The container reads `bootptab` at startup and automatically writes `.rhosts` trust entries for each client hostname.
 
@@ -284,9 +284,11 @@ Windows Docker Desktop is not a supported runtime target for real SGI LAN instal
 - `docker/entrypoint.sh` - generates `.rhosts` and starts `xinetd`.
 - `docker/xinetd.d/` - BOOTP, TFTP, and RSH xinetd services baked into the image.
 
-## SGI Client Setup And Boot Commands
+## SGI Client Boot And Install Sources
 
-This section uses the local file layout shown below. The command syntax was checked against the SGI reference PDFs in `reference/`, especially `IRIX Admin - System Configuration and Operation`, `IRIX 6.5 Installation Guide`, and the saved remote-install guide.
+This README is not a full IRIX installation guide. It documents the server layout and the network paths that matter for this container. Use the official SGI manuals for partitioning, install stream selection, conflict handling, and post-install system setup.
+
+Use the Command Monitor method below as the primary path. The PROM menu option `2` / `Install System Software` is intentionally not documented here because it can treat the remote directory as the default install source and behave poorly with a split media layout.
 
 ### Preferred Media Layout
 
@@ -296,40 +298,25 @@ Keep the install media under `irix/`, using short directory names because these 
 irix/
   65/
     dist/
-	  miniroot/
-	firmware/
-	help/
-	insight/
-	relnotes/
-	stand/
+    firmware/
+    help/
+    insight/
+    relnotes/
+    stand/
   6522/
     apps/
-	  dist/
-	    dev/
-		extras/
-	  NT/
-	  relnotes/
-	dist/
-	  minroot/
-	  unbundled/
-	installtools/
-	relnotes/
-	stand/
-	WhatsNew/
+      dist/
+    dist/
+    installtools/
+    relnotes/
+    stand/
   6530/
     apps/
-	  dist/
-	    dev/
-		extras/
-	  NT/
-	  relnotes/
-	dist/
-	  miniroot/
-	  unbundled/
-	installtools/
-	relnotes/
-	stand/
-	WhatsNew/
+      dist/
+    dist/
+    installtools/
+    relnotes/
+    stand/
 ```
 
 For Octane and Octane2, the important architecture is `IP30`, so the miniroot kernel is:
@@ -353,15 +340,17 @@ If your PROM has `dlserver`, set it to the install server IP:
 setenv dlserver 192.168.0.9
 ```
 
-### Command Monitor Method
+### Command Monitor Boot
 
-From the Command Monitor, boot `sash64` first (or sashARCS if you are not on a 64-bit platform):
+For late 64-bit systems such as Octane2, boot the standalone shell from the current install tools `dist/sa` file. This was verified on a dual R14000/V12 Octane2 and loaded `Standalone Shell SGI Version 6.5 ARCS Jul 20, 2006 (64 Bit)`:
 
 ```text
-bootp():6530/stand/sash64 -x
+boot -f bootp():6530/dist/sa(sash64)
 ```
 
-On Octane/Octane2, run `fx.64` (or fx.ARCS if you are not on a 64-bit platform) from `sash64`:
+Use `sashARCS` instead of `sash64` on 32-bit ARCS systems when the media supports it.
+
+From the standalone shell, run `fx.64` for Octane/Octane2. Use `fx.ARCS` instead on 32-bit ARCS systems:
 
 ```text
 boot -f bootp():6530/stand/fx.64 --x
@@ -369,7 +358,7 @@ boot -f bootp():6530/stand/fx.64 --x
 
 The double dash is intentional here. The SGI boot layer removes one leading dash when passing arguments to the next program, so `--x` becomes `-x` for `fx`.
 
-To boot the miniroot for Octane/Octane2 from `sash64`:
+To boot the miniroot for Octane/Octane2 from the standalone shell:
 
 ```text
 boot -f bootp():6530/dist/miniroot/unix.IP30
@@ -381,34 +370,7 @@ Some systems can boot the miniroot directly from the Command Monitor:
 bootp():6530/dist/miniroot/unix.IP30
 ```
 
-If direct `fx.64` boot fails but `sash64` works, use the `sash64` two-step method above.
-
-### PROM Menu Method
-
-From the System Maintenance Menu, use the guided install path:
-
-1. Choose `2` for `Install System Software`.
-2. Choose `Remote Directory`.
-3. Enter the install server hostname:
-
-```text
-cosmos
-```
-
-4. Enter the TFTP-root-relative distribution path:
-
-```text
-6530/dist
-```
-
-The install server hostname should match the container hostname and a name in `config/hosts`. In this project, that is `cosmos`:
-
-```text
-192.168.0.9     cosmos cosmos.example.net
-```
-
-The PROM menu method uses the early BOOTP/TFTP install path. After the miniroot starts and you reach `Inst>`, access to distributions uses RSH instead.
-
+Avoid using an old `stand/sash64` when a current `dist/sa(sash64)` is available. In one tested 6.5.30 media layout, `6530/stand/sash64` was from 1998 while `6530/dist/sa`, `fx.64`, and `unix.IP30` were from 2006.
 ### Opening Distributions In `inst`
 
 Inside `inst`, use the `guest` account. For this container, the path is relative to `/home/guest`, so include `irix/`:
@@ -428,6 +390,16 @@ guest@192.168.0.9:irix/6530/dist
 ```
 
 Use the IP address unless hostname resolution works inside the SGI miniroot.
+
+### Official Installation References
+
+For the full IRIX installation process, read the SGI manuals. Local copies are kept in `reference/`, and direct PDF links are available from the IRIX7 TechPubs archive:
+
+- [IRIX 6.5 Installation Instructions](https://www.irix7.com/techpubs/007-3862-007.pdf): read `How to Install Operating System Software`, `How to Install IRIX 6.5.x on a Pre-6.5 Release or a Clean Disk`, `Installations for Nongraphical Systems`, and `Troubleshooting Remote Installations`.
+- [IRIX Admin: Software Installation and Licensing](https://www.irix7.com/techpubs/007-1364-140.pdf): read Part I, especially Chapter 2, `Preparing for Installation`, including installation server setup, BOOTP/TFTP, installation accounts, and distribution directories.
+- [IRIX Admin: System Configuration and Operation](https://www.irix7.com/techpubs/007-2859-021.pdf): use as the general IRIX administration reference for PROM/boot behavior, network setup, and service configuration.
+
+The full IRIX7 archive is here: [Silicon Graphics Technical Document Archive](https://www.irix7.com/techpubs.html).
 
 ## Troubleshooting
 
@@ -467,13 +439,13 @@ PROM paths are relative to the TFTP root, which is `/home/guest/irix` inside the
 Use this from the PROM:
 
 ```text
-bootp():6530/stand/sash64 -x
+boot -f bootp():6530/dist/sa(sash64)
 ```
 
 Do not include `irix/` in PROM/TFTP paths. This is wrong for the PROM:
 
 ```text
-bootp():irix/6530/stand/sash64 -x
+boot -f bootp():irix/6530/dist/sa(sash64)
 ```
 
 But `inst` uses RSH through the `guest` account, so `inst` paths do include `irix/`:
@@ -485,7 +457,7 @@ guest@192.168.0.9:irix/6530/dist
 Also confirm the requested file actually exists for the target system architecture. For example, Octane/Octane2 systems use IP30 miniroots and 64-bit standalone tools:
 
 ```sh
-docker exec irix-install test -f /home/guest/irix/6530/stand/sash64
+docker exec irix-install test -f /home/guest/irix/6530/dist/sa
 docker exec irix-install test -f /home/guest/irix/6530/dist/miniroot/unix.IP30
 ```
 
@@ -493,7 +465,7 @@ Older systems may need a different IRIX release or a different standalone tool, 
 
 ### Hostname Mismatch
 
-If you use the PROM menu's `Remote Directory` flow or specify a server name in a `bootp()` path, the server name should match the container hostname and a name in `config/hosts`.
+If you specify a server name in a `bootp()` path, the server name should match the container hostname and a name in `config/hosts`.
 
 For this README's example:
 
@@ -508,7 +480,7 @@ hostname: cosmos
 For named PROM boot paths, use the hostname form, not the IP address form:
 
 ```text
-bootp()cosmos:6530/stand/sash64 -x
+boot -f bootp()cosmos:6530/dist/sa(sash64)
 ```
 
 The named server must match the container hostname. Keep the matching short hostname in `config/hosts`, even if you also include a fully qualified name.
@@ -547,19 +519,30 @@ Messages about denied access, `.rhosts`, or PAM usually mean the client hostname
 
 ### `fx.64` Does Not Boot Directly
 
-On Octane/Octane2, direct `fx.64` boot may fail even when BOOTP/TFTP are working. Boot `sash64` first:
+On Octane/Octane2, direct `fx.64` boot may fail even when BOOTP/TFTP are working. Boot the current standalone shell first:
 
 ```text
-bootp():6530/stand/sash64 -x
+boot -f bootp():6530/dist/sa(sash64)
 ```
 
-Then run `fx.64` from `sash64`:
+Then run `fx.64` from that shell:
 
 ```text
 boot -f bootp():6530/stand/fx.64 --x
 ```
 
 The `--x` form is intentional in this context because one leading dash is stripped while passing the argument through the boot layer.
+
+### Miniroot Kernel Panics Or Reboots
+
+If `unix.IP30` transfers and starts but then panics or reboots, the problem is no longer a basic Docker/TFTP path issue. In Octane2 testing, a separate container on the same `macvlan` network fetched `6530/dist/miniroot/unix.IP30` over TFTP and its SHA256 matched the source file exactly.
+
+Things to check next:
+
+- Boot through the current `dist/sa(sash64)` path, not an older `stand/sash64`.
+- Verify that the miniroot matches the target architecture, for example `unix.IP30` for Octane/Octane2.
+- Check PROM/NVRAM state, especially on systems reporting a lost battery-backed clock.
+- As a diagnostic only, try disabling multiprocessing from PROM with `setenv disable_mp 1` before booting the miniroot.
 
 ### Multiple BOOTP Servers
 

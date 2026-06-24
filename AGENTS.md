@@ -4,7 +4,7 @@
 
 This project maintains a Docker-based SGI IRIX network install server. The goal is to replace the abandoned `dexter1/irix-install` dependency with a locally owned, documented, compatibility-first image.
 
-The install server provides BOOTP, TFTP, and RSH services to real SGI hardware on a trusted LAN. The mounted `dist/` directory contains user-provided IRIX install media and must never be copied into the image, committed, archived by default, or modified by automation.
+The install server provides BOOTP, TFTP, and RSH services to real SGI hardware on a trusted LAN. The mounted `irix/` directory contains user-provided IRIX install media and must never be copied into the image, committed, archived by default, or modified by automation.
 
 ## Working Rules
 
@@ -31,7 +31,7 @@ When debugging Docker or runtime behavior, give one command at a time and wait f
 - Example server hostname: `irix-install`
 - Example server IP: `192.168.0.9`
 - Example network: external Docker `macvlan`
-- Mounted media path: `./dist` to `/DIST:ro`
+- Mounted media path: `./irix` to `/home/guest/irix:ro`
 - User config:
   - `config/bootptab`
   - `config/hosts`
@@ -49,11 +49,11 @@ Local deployments may use different hostnames, IPs, and paths.
   - `xinetd`
 - Keep `xinetd` as PID 1 with `-d -dontfork`.
 - Bake BOOTP, TFTP, and RSH xinetd service definitions into the image.
-- Mount only user-specific config and `/DIST`.
+- Mount only user-specific config and `/home/guest/irix`.
 - Generate `.rhosts` from configured BOOTP client hostnames at startup.
 
 ## Safety Notes
 
 This project intentionally uses insecure legacy services. RSH, passwordless users, and `.rhosts` trust may be required for IRIX install compatibility. These services must only be run on a trusted isolated LAN or equivalent controlled network segment.
 
-`dist/` may contain licensed or sensitive install media. Never include it in archives, git history, Docker build context, or generated images.
+`irix/` may contain licensed or sensitive install media. Never include it in archives, git history, Docker build context, or generated images.

@@ -18,7 +18,7 @@ Fields:
 - `ip=192.168.0.10` - SGI client IP address.
 - `sm=255.255.255.0` - subnet mask supplied to the client.
 - `sa=192.168.0.9` - install server address.
-- `ds=192.168.0.9` - domain/DNS server address supplied to the client.
+- `ds=192.168.0.9` - distribution server address supplied to the client.
 - `gw=192.168.0.1` - gateway supplied to the client.
 - `rp=/home/guest/irix` - root path supplied to the client.
 
@@ -26,7 +26,7 @@ Fields:
 
 Optional field:
 
-- `bf=6530/stand/sash64` - default boot file, relative to the TFTP root. This is useful for menu-driven installs or default boots, but explicit PROM commands such as `bootp():6530/stand/sash64 -x` do not require it.
+- `bf=<tftp-root-relative-file>` - optional default boot file. Leave this unset unless you have tested a default boot path for that client; the documented workflow uses explicit PROM commands instead.
 
 Keep each client entry on one line. The container uses the hostname before the first colon to generate `.rhosts` trust entries at startup.
 
@@ -100,7 +100,7 @@ The container writes the generated trust entries to both `/home/guest/.rhosts` a
 The TFTP server is rooted at `/home/guest/irix`, so the media-relative path is the same in both phases:
 
 ```text
-PROM: bootp():6530/stand/sash64 -x
+PROM: boot -f bootp():6530/dist/sa(sash64)
 inst: guest@192.168.0.9:irix/6530/dist
 ```
 
@@ -108,13 +108,13 @@ This is insecure legacy behavior and should only be used on a trusted install LA
 
 ## Verified Client
 
-An SGI Octane2 client was verified against the maintained install container on 2026-06-13.
+An SGI Octane2 client was verified against the maintained install container during June 2026 testing.
 
 Working PROM command:
 
 ```text
-bootp():6530/stand/sash64 -x
+boot -f bootp():6530/dist/sa(sash64)
 ```
 
-This loaded the 64-bit standalone shell and confirmed BOOTP/TFTP function against real SGI hardware.
+This loaded the 6.5.30 64-bit standalone shell from `dist/sa` and confirmed BOOTP/TFTP function against real SGI hardware. Miniroot boot testing remained hardware/PROM-sensitive and should be debugged separately from basic TFTP service checks.
 

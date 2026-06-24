@@ -19,8 +19,7 @@ RUN useradd -c "Guest User" -d /home/guest -m -s /bin/mksh guest \
     && chsh -s /bin/mksh root \
     && passwd -d root \
     && passwd -d guest \
-    && mkdir -p /home/guest/irix \
-    && ln -s /home/guest/irix /DIST
+    && mkdir -p /home/guest/irix
 
 COPY docker/xinetd.d/bootps /etc/xinetd.d/bootps
 COPY docker/xinetd.d/tftp /etc/xinetd.d/tftp

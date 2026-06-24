@@ -5,10 +5,10 @@
 # the first colon to generate .rhosts trust entries at startup.
 #
 # Format:
-# hostname:ht=ether:ha=<client-mac-without-colons>:ip=<client-ip>:sm=<subnet-mask>:sa=<install-server-ip>:ds=<dns-or-install-server-ip>:gw=<gateway-ip>:rp=/home/guest/irix
+# hostname:ht=ether:ha=<client-mac-without-colons>:ip=<client-ip>:sm=<subnet-mask>:sa=<install-server-ip>:ds=<distribution-server-ip>:gw=<gateway-ip>:rp=/home/guest/irix
 #
 # Optional:
 # bf=<tftp-root-relative-boot-file>
-# Example: bf=6530/stand/sash64
+# Example: bf=6530/dist/miniroot/unix.IP30
 
 octane:ht=ether:ha=080069c0ffee:ip=192.168.0.10:sm=255.255.255.0:sa=192.168.0.9:ds=192.168.0.9:gw=192.168.0.1:rp=/home/guest/irix
